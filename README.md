@@ -2,5 +2,5 @@
 
 How to execute?
 
-$ g++ -O2 -fopenmp matMultiply.cpp -o matMultiply
-<br>./matMultiply
+$ g++ -O2 -fopenmp matMultiply.cpp -o matMultiply<br>
+$ ./matMultiply
