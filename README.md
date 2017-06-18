@@ -23,11 +23,11 @@ For Debian-based distros, run `sudo apt install gcc g++`.
 
 For Arch-based distros, run `sudo pacman -S gcc`.
 
-##Windows
+## Windows
 
 You'll need to install [MinGW](http://www.mingw.org/) and [add it to your PATH](https://www.howtogeek.com/118594/how-to-edit-your-system-path-for-easy-command-line-access/).
 
-##Mac
+## Mac
 
 You'll need to install [XCode](https://developer.apple.com/xcode/).
 
