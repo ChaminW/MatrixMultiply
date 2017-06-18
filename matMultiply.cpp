@@ -1,3 +1,9 @@
+/*
+ * Parallel Matrix Multiplication using openMP
+ * Compile with -fopenmp flag
+ * Author: Chamin Wickramarathna
+ */
+
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
@@ -36,23 +42,27 @@ void multiplyMatParallel(vector< vector<double> > &a,vector< vector<double> > &b
 		// Compute matrix multiplication.
 		// C <- C + A x B
 		// Use omp parrelle for loop
-		#pragma omp parallel for
-		for (int i = 0; i < n; ++i) {
-			#pragma omp parallel for
-			for (int j = 0; j < n; ++j) {
-				double temp  = 0;
-				#pragma omp parallel for
-				for (int k = 0; k < n; ++k) {
-					temp += a[i][k] * b[k][j];
+		 int i,j,k;
+		#pragma omp parallel shared(a,b,c) private(i,j,k) 
+		{
+			#pragma omp for schedule(static)
+			for (i = 0; i < n; ++i) {
+				
+				for (j = 0; j < n; ++j) {	
+					
+					double temp  = 0;
+					for (k = 0; k < n; ++k) {
+						temp += a[i][k] * b[k][j];
+					}
+					c[i][j]=temp;
 				}
-				c[i][j]=temp;
 			}
 		}
 	}
 int main()
 {
 	cout << "Sequential multiplication"<< endl;
-	for (int n = 200; n < 2000; n+=200) {
+	for (int n = 200; n <= 2000; n+=200) {
 		vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
 		
 		initMat(a,b,n);
@@ -64,7 +74,7 @@ int main()
 	}
 	
 	cout << "Parallel multiplication using openMP"<< endl;
-	for (int n = 200; n < 2000; n+=200) {
+	for (int n = 200; n <= 2000; n+=200) {
 		vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
 		
 		initMat(a,b,n);
