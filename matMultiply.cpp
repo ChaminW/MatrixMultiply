@@ -6,8 +6,7 @@
 
 using namespace std;
 
-clock_t start, end;
-double msecs;
+double dtime;
 
 void initMat(vector< vector<double> > &a,vector< vector<double> > &b,int n){
 		// Initialize arrays.
@@ -24,10 +23,11 @@ void multiplyMatSeq(vector< vector<double> > &a,vector< vector<double> > &b, vec
 		// C <- C + A x B
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < n; ++j) {
+				double temp  = 0;
 				for (int k = 0; k < n; ++k) {
-					c[i][j] += a[i][k] * b[k][j];
-					
+					temp += a[i][k] * b[k][j];
 				}
+				c[i][j]=temp;
 			}
 		}
 	}
@@ -38,11 +38,14 @@ void multiplyMatParallel(vector< vector<double> > &a,vector< vector<double> > &b
 		// Use omp parrelle for loop
 		#pragma omp parallel for
 		for (int i = 0; i < n; ++i) {
+			#pragma omp parallel for
 			for (int j = 0; j < n; ++j) {
+				double temp  = 0;
+				#pragma omp parallel for
 				for (int k = 0; k < n; ++k) {
-					c[i][j] += a[i][k] * b[k][j];
-					
+					temp += a[i][k] * b[k][j];
 				}
+				c[i][j]=temp;
 			}
 		}
 	}
@@ -54,11 +57,10 @@ int main()
 		
 		initMat(a,b,n);
 		
-		start = clock();
+		dtime = omp_get_wtime();
 		multiplyMatSeq(a,b,c,n);
-		end = clock();
-		msecs = ((double) (end - start)) * 1000 / CLOCKS_PER_SEC;
-		cout << "Time taken to execute in n-"<< n << " : "<< msecs << endl;
+		dtime = omp_get_wtime() - dtime;
+		cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
 	}
 	
 	cout << "Parallel multiplication using openMP"<< endl;
@@ -67,11 +69,10 @@ int main()
 		
 		initMat(a,b,n);
 		
-		start = clock();
+		dtime = omp_get_wtime();
 		multiplyMatParallel(a,b,c,n);
-		end = clock();
-		msecs = ((double) (end - start)) * 1000 / CLOCKS_PER_SEC;
-		cout << "Time taken to execute in n-"<< n << " : "<< msecs << endl;
+		dtime = omp_get_wtime() - dtime;
+		cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
 	}
     return 0;
 }
