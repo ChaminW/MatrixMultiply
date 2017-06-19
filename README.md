@@ -1,10 +1,10 @@
 # Matrix Multiply
 
-This c++ package demostrate the multiplication of two random matrices(n x n) using sequential method and parallel method. It measure the time taken to complete the process for each n value(200 - 2000).
+This c++ package demonstrate the multiplication of two random matrices(n x n) using sequential method and parallel method. It measure the average time taken to complete the process for each n value(200 - 2000).
 
 # Dependencies
 
-This package relies on a C / C++ compiler (gcc).
+This package relies on C / C++ compiler (gcc) and openMP.
 
 ## Linux
 
