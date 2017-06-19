@@ -61,10 +61,12 @@ void multiplyMatParallel(vector< vector<double> > &a,vector< vector<double> > &b
 	
 int main()
 {
+	const int sampleSize=10; // Number of sample size consider to evaluate average time taken
+	const int maxSize=2000;  // maximum size of the 2d matrix
 	cout << "Sequential multiplication"<< endl;
-	for (int n = 200; n <= 2000; n+=200) {
+	for (int n = 200; n <= maxSize; n+=200) {
 		double total_time = 0;
-		for (int k = 0; k < 20; k++) {
+		for (int k = 0; k < sampleSize; k++) {
 			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
 			
 			initMat(a,b,n);
@@ -79,9 +81,9 @@ int main()
 	}
 	
 	cout << "Parallel multiplication using openMP"<< endl;
-	for (int n = 200; n <= 2000; n+=200) {
+	for (int n = 200; n <= maxSize; n+=200) {
 		double total_time = 0;
-		for (int k = 0; n < 20; n++) {
+		for (int k = 0; k < sampleSize; k++) {
 			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
 			
 			initMat(a,b,n);
