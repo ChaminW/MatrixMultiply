@@ -47,9 +47,7 @@ void multiplyMatParallel(vector< vector<double> > &a,vector< vector<double> > &b
 		{
 			#pragma omp for schedule(static)
 			for (i = 0; i < n; ++i) {
-				
 				for (j = 0; j < n; ++j) {	
-					
 					double temp  = 0;
 					for (k = 0; k < n; ++k) {
 						temp += a[i][k] * b[k][j];
@@ -63,26 +61,36 @@ int main()
 {
 	cout << "Sequential multiplication"<< endl;
 	for (int n = 200; n <= 2000; n+=200) {
-		vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
-		
-		initMat(a,b,n);
-		
-		dtime = omp_get_wtime();
-		multiplyMatSeq(a,b,c,n);
-		dtime = omp_get_wtime() - dtime;
-		cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
+		double total_time = 0;
+		for (int k = 0; k < 20; k++) {
+			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
+			
+			initMat(a,b,n);
+			
+			dtime = omp_get_wtime();
+			multiplyMatSeq(a,b,c,n);
+			dtime = omp_get_wtime() - dtime;
+			//cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
+			total_time+= dtime;
+		}
+		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/20 << endl;
 	}
 	
 	cout << "Parallel multiplication using openMP"<< endl;
 	for (int n = 200; n <= 2000; n+=200) {
-		vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
-		
-		initMat(a,b,n);
-		
-		dtime = omp_get_wtime();
-		multiplyMatParallel(a,b,c,n);
-		dtime = omp_get_wtime() - dtime;
-		cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
+		double total_time = 0;
+		for (int k = 0; n < 20; n++) {
+			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
+			
+			initMat(a,b,n);
+			
+			dtime = omp_get_wtime();
+			multiplyMatParallel(a,b,c,n);
+			dtime = omp_get_wtime() - dtime;
+			//cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
+			total_time+= dtime;
+		}
+		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/20 << endl;
 	}
     return 0;
 }

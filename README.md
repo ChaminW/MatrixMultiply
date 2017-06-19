@@ -33,5 +33,5 @@ You'll need to install [XCode](https://developer.apple.com/xcode/).
 
 # How to execute?
 
-$ g++ -O2 -fopenmp matMultiply.cpp -o matMultiply<br>
+$ g++ -fopenmp matMultiply.cpp -o matMultiply<br>
 $ ./matMultiply
