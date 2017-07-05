@@ -9,13 +9,11 @@ This package relies on C / C++ compiler (gcc) and openMP.
 ## Linux
 
 The GNU Compiler Collection may come with your distribution. Run `which gcc g++` to find out.<br>
-If that command does not output
+If that command does not output as below, you will require to install it.
 ```shell
 /usr/bin/gcc
 /usr/bin/g++
 ```
-
-you will need to install it.
 
 For RHEL-based distros, run `sudo dnf install gcc gcc-c++`.
 
@@ -25,13 +23,25 @@ For Arch-based distros, run `sudo pacman -S gcc`.
 
 ## Windows
 
-You'll need to install [MinGW](http://www.mingw.org/) and [add it to your PATH](https://www.howtogeek.com/118594/how-to-edit-your-system-path-for-easy-command-line-access/).
+You will require to install [MinGW](http://www.mingw.org/) and [add it to your PATH](https://www.howtogeek.com/118594/how-to-edit-your-system-path-for-easy-command-line-access/).
 
 ## Mac
 
-You'll need to install [XCode](https://developer.apple.com/xcode/).
+You will require to install [XCode](https://developer.apple.com/xcode/).
 
 # How to execute?
 
+## Linux
+```shell
 $ g++ -fopenmp matMultiply.cpp -o matMultiply<br>
 $ ./matMultiply
+```
+
+## Windows
+```shell
+g++ -fopenmp matMultiply.cpp -o matMultiply<br>
+matMultiply
+```
+
+Both parallelized and optimized versions can be executed as above.
+Upon execution, the execution times and the calculated speed up values will be displayed.
