@@ -76,6 +76,20 @@ void fillZeros(vector< vector<double> > &newA, vector< vector<double> > &newB, v
 	}
 }
 
+void fillZerosParallel(vector< vector<double> > &newA, vector< vector<double> > &newB, vector< vector<double> > &a, vector< vector<double> > &b, int n){
+	int i, j;
+	#pragma omp parallel shared(a,b,newA,newB) private(i,j,k)
+	{
+		#pragma omp for schedule(static)
+		for (i=0; i<n; i++){
+			for (j=0; j<n; j++){
+				newA[i][j] = a[i][j];
+				newB[i][j] = b[i][j];
+			}
+		}
+	}
+}
+
 void add(vector< vector<double> > &a, vector< vector<double> > &b, vector< vector<double> > &resultMatrix, int n){
 	for(int i=0; i<n; i++){
 		for(int j=0; j<n; j++){
@@ -213,7 +227,7 @@ void multiplyStrassenParallel(vector< vector<double> > &a,vector< vector<double>
 			newB = b;
 		}
 		else{
-			fillZeros(newA, newB, a, b, n);
+			fillZerosParallel(newA, newB, a, b, n);
 		}
 		
 		//initialize submatrices
@@ -364,16 +378,20 @@ int main()
 {
 	srand(time(0));   //seed for random number generation
 	
-	vector<double> strTime(10);
-	vector<double> strParTime(10);
+	const int matrixCount = 10;   //no of matrix sizes taken into account
+	const int sampleSize = 20;    //no of samples to evaluate average time taken
+	const int maxSize = 2000;     //maximum size of the matrix 
+	
+	vector<double> strTime(matrixCount);
+	vector<double> strParTime(matrixCount);
 	
 	int count = 0;
 	
 	cout << "Sequential multiplication with Strassen - Optimization 2"<< endl;
 	count = 0;
-	for (int n = 200; n <= 2000; n+=200) {
+	for (int n = 200; n <= maxSize; n+=200) {
 		double total_time = 0;
-		for (int k = 0; k < 20; k++) {
+		for (int k = 0; k < sampleSize; k++) {
 			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
 			
 			initMat(a,b,n);
@@ -383,16 +401,16 @@ int main()
 			//cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
 			total_time+= dtime;
 		}
-		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/20 << endl;
-		strTime[count] = total_time/20;
+		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/sampleSize << endl;
+		strTime[count] = total_time/sampleSize;
 		count++;
 	}
 	
 	cout << "Parallel multiplication using openMP with Strassen - Optimization 2"<< endl;
 	count = 0;
-	for (int n = 200; n <= 2000; n+=200) {
+	for (int n = 200; n <= maxSize; n+=200) {
 		double total_time = 0;
-		for (int k = 0; n < 20; n++) {
+		for (int k = 0; n < sampleSize; n++) {
 			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
 			
 			initMat(a,b,n);
@@ -403,13 +421,13 @@ int main()
 			//cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
 			total_time+= dtime;
 		}
-		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/20 << endl;
-		strParTime[count] = total_time/20;
+		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/sampleSize << endl;
+		strParTime[count] = total_time/sampleSize;
 		count++;
 	}  
 	
 	int n = 200;
-	for(int i=0; i<10; i++){
+	for(int i=0; i<matrixCount; i++){
 		cout << "Speed up using Strassen for n-" << n << " : " << strTime[i]/strParTime[i] << endl;
 		n+=200;
 	}
