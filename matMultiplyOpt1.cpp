@@ -76,9 +76,20 @@ void multiplyTMatSeq(vector< vector<double> > &a,vector< vector<double> > &b, ve
 	
 int main()
 {
-	const int sampleSize=1;
-	const int maxSize=800;
-	cout << "Sequential multiplication with transpose - optimization 1"<< endl;
+	srand(time(0));   //seed for random number generation
+	
+	const int matrixCount = 10;     //no of matrix sizes taken into account
+	const int sampleSize = 20;      // Number of sample size consider to evaluate average time taken
+	const int maxSize = 2000;       // maximum size of the 2d matrix
+	
+	//vectors storing execution time values
+	vector<double> trnTime(matrixCount);      
+	vector<double> trnParTime(matrixCount);
+	
+	int count = 0;
+	
+	cout << "Sequential multiplication with transpose - Optimization 1"<< endl;
+	count = 0;
 	for (int n = 200; n <= maxSize; n+=200) {
 		double total_time = 0;
 		for (int k = 0; k < sampleSize; k++) {
@@ -93,9 +104,12 @@ int main()
 			total_time+= dtime;
 		}
 		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/sampleSize << endl;
+		trnTime[count] = total_time/sampleSize;
+		count++;
 	}
 	
-	cout << "Parallel multiplication using openMP with transpose - optimization 1"<< endl;
+	cout << "Parallel multiplication using openMP with transpose - Optimization 1"<< endl;
+	count = 0;
 	for (int n = 200; n <= maxSize; n+=200) {
 		double total_time = 0;
 		for (int k = 0; k < sampleSize; k++) {
@@ -110,6 +124,15 @@ int main()
 			total_time+= dtime;
 		}
 		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/sampleSize << endl;
+		trnParTime[count] = total_time/sampleSize;
+		count++;
+	}
+	
+	cout << "Speed up calculations - Using transpose" << endl;
+	int n = 200;
+	for(int i=0; i<matrixCount; i++){
+		cout << "Speed up after using transpose for n-" << n << " : " << trnTime[i]/trnParTime[i] << endl;
+		n+=200;
 	}
 	
     return 0;

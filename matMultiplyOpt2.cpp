@@ -78,7 +78,7 @@ void fillZeros(vector< vector<double> > &newA, vector< vector<double> > &newB, v
 
 void fillZerosParallel(vector< vector<double> > &newA, vector< vector<double> > &newB, vector< vector<double> > &a, vector< vector<double> > &b, int n){
 	int i, j;
-	#pragma omp parallel shared(a,b,newA,newB) private(i,j,k)
+	#pragma omp parallel shared(a,b,newA,newB) private(i,j)
 	{
 		#pragma omp for schedule(static)
 		for (i=0; i<n; i++){
@@ -382,7 +382,8 @@ int main()
 	const int sampleSize = 20;    //no of samples to evaluate average time taken
 	const int maxSize = 2000;     //maximum size of the matrix 
 	
-	vector<double> strTime(matrixCount);
+	//vectors storing execution time values
+	vector<double> strTime(matrixCount);      
 	vector<double> strParTime(matrixCount);
 	
 	int count = 0;
@@ -426,6 +427,7 @@ int main()
 		count++;
 	}  
 	
+	cout << "Speed up calculations - Using Strassen" << endl;
 	int n = 200;
 	for(int i=0; i<matrixCount; i++){
 		cout << "Speed up using Strassen for n-" << n << " : " << strTime[i]/strParTime[i] << endl;
