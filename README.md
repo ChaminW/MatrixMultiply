@@ -37,13 +37,13 @@ You will require to install [XCode](https://developer.apple.com/xcode/).
 
 ## Linux
 ```shell
-$ g++ -fopenmp matMultiply.cpp -o matMultiply<br>
+$ g++ -fopenmp matMultiply.cpp -o matMultiply
 $ ./matMultiply
 ```
 
 ## Windows
 ```shell
-g++ -fopenmp matMultiply.cpp -o matMultiply<br>
+g++ -fopenmp matMultiply.cpp -o matMultiply
 matMultiply
 ```
 
@@ -52,7 +52,7 @@ Upon execution, the execution times and the calculated speed up values will be d
 
 The ```matMultiplyOpt2.cpp``` file containing optimizing using Strassen algorithm can be supplied with a suitable integer threshold value as follows:
 ```shell
-g++ -fopenmp matMultiplyOpt2.cpp -o matMultiply<br>
+g++ -fopenmp matMultiplyOpt2.cpp -o matMultiply
 matMultiply threshold-value
 ```
 
