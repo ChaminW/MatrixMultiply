@@ -50,9 +50,9 @@ matMultiply
 Both parallelized and optimized versions can be executed as above.
 Upon execution, the execution times and the calculated speed up values will be displayed.
 
-The 'matMultiplyOpt2' file containing optimizing using Strassen algorithm can be supplied with a suitable integer threshold value as follows:
+The ```matMultiplyOpt2.cpp``` file containing optimizing using Strassen algorithm can be supplied with a suitable integer threshold value as follows:
 ```shell
-g++ -fopenmp matMultiply.cpp -o matMultiply<br>
+g++ -fopenmp matMultiplyOpt2.cpp -o matMultiply<br>
 matMultiply threshold-value
 ```
 
