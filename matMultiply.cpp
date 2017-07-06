@@ -143,33 +143,6 @@ int main()
 		cout << endl;
 	}
 	
-	
-	/* count = 0;
-	for (int n = 200; n <= maxSize; n+=200) {
-		double total_time = 0;
-		for (int k = 0; k < sampleSize; k++) {
-			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
-			
-			initMat(a,b,n);
-			
-			dtime = omp_get_wtime();
-			multiplyMatParallel(a,b,c,n);
-			dtime = omp_get_wtime() - dtime;
-			//cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
-			total_time+= dtime;
-		}
-		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/sampleSize << endl;
-		parTime[count] = total_time/sampleSize;
-		count++;
-	}
-	
-	cout << "Speed up calculations - Using parallelization" << endl;
-	int n = 200;
-	for(int i=0; i<matrixCount; i++){
-		cout << "Speed up after Parallelizing for n-" << n << " : " << seqTime[i]/parTime[i] << endl;
-		n+=200;
-	} */
-	
     return 0;
 }
 

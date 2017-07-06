@@ -101,7 +101,7 @@ int main()
 	srand(time(0));   //seed for random number generation
 	
 	const int sampleSize = 20;      // Number of sample size consider to evaluate average time taken
-	const int maxSize = 600;       // maximum size of the 2d matrix
+	const int maxSize = 2000;       // maximum size of the 2d matrix
 	double dtime;
 	double seqMean;
 	double parMean;
@@ -156,46 +156,6 @@ int main()
 		cout << "Speed up after Parallelizing for n-" << n << " : " << seqMean/parMean << endl;
 		cout << endl;
 	}
-	
-	/* cout << "Sequential multiplication with transpose - Optimization 1"<< endl;
-	count = 0;
-	for (int n = 200; n <= maxSize; n+=200) {
-		double total_time = 0;
-		for (int k = 0; k < sampleSize; k++) {
-			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),btrans(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
-			
-			initMat(a,b,n);
-			
-			dtime = omp_get_wtime();
-			multiplyTMatSeq(a,b,c,n);
-			dtime = omp_get_wtime() - dtime;
-			//cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
-			total_time+= dtime;
-		}
-		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/sampleSize << endl;
-		trnTime[count] = total_time/sampleSize;
-		count++;
-	}
-	
-	cout << "Parallel multiplication using openMP with transpose - Optimization 1"<< endl;
-	count = 0;
-	for (int n = 200; n <= maxSize; n+=200) {
-		double total_time = 0;
-		for (int k = 0; k < sampleSize; k++) {
-			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),btrans(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
-			
-			initMat(a,b,n);
-			
-			dtime = omp_get_wtime();
-			multiplyTMatParallel(a,b,c,n);
-			dtime = omp_get_wtime() - dtime;
-			//cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
-			total_time+= dtime;
-		}
-		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/sampleSize << endl;
-		trnParTime[count] = total_time/sampleSize;
-		count++;
-	} */
 	
     return 0;
 }

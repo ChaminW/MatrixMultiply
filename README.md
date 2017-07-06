@@ -2,6 +2,10 @@
 
 This c++ package demonstrate the multiplication of two random matrices(n x n) using sequential method and parallel method. It measure the average time taken to complete the process for each n value(200 - 2000).
 
+```matMultiply.cpp``` - Sequential matrix multiplication and its parallelization using OpenMP<br>
+```matMultiplyOpt1.cpp``` - Optimized program using transpose<br>
+```matMultiplyOpt2.cpp``` - Optimized program using Strassen
+
 # Dependencies
 
 This package relies on C / C++ compiler (gcc) and openMP.
@@ -28,12 +32,6 @@ You will require to install [MinGW](http://www.mingw.org/) and [add it to your P
 ## Mac
 
 You will require to install [XCode](https://developer.apple.com/xcode/).
-
-# Content
-
-matMultiply.cpp - Sequential matrix multiplication and its parallelization using OpenMP
-matMultiplyOpt1.cpp - Optimized program using transpose
-matMultiplyOpt2.cpp - Optimized program using Strassen 
 
 # How to execute?
 
