@@ -29,6 +29,12 @@ You will require to install [MinGW](http://www.mingw.org/) and [add it to your P
 
 You will require to install [XCode](https://developer.apple.com/xcode/).
 
+# Content
+
+matMultiply.cpp - Sequential matrix multiplication and its parallelization using OpenMP
+matMultiplyOpt1.cpp - Optimized program using transpose
+matMultiplyOpt2.cpp - Optimized program using Strassen 
+
 # How to execute?
 
 ## Linux
@@ -45,3 +51,12 @@ matMultiply
 
 Both parallelized and optimized versions can be executed as above.
 Upon execution, the execution times and the calculated speed up values will be displayed.
+
+The 'matMultiplyOpt2' file containing optimizing using Strassen algorithm can be supplied with a suitable integer threshold value as follows:
+```shell
+g++ -fopenmp matMultiply.cpp -o matMultiply<br>
+matMultiply threshold-value
+```
+
+The default threshold value is 128.
+
