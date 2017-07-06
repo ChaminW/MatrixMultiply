@@ -9,10 +9,9 @@
 #include <cstdlib>
 #include <vector>
 #include <omp.h>
+#include <cmath>
 
 using namespace std;
-
-double dtime;
 
 void initMat(vector< vector<double> > &a,vector< vector<double> > &b,int n){
 		// Initialize arrays.
@@ -58,43 +57,94 @@ void multiplyMatParallel(vector< vector<double> > &a,vector< vector<double> > &b
 		}
 	}
 	
+double calculateMean(vector<double> data, int size) {
+    double sum = 0.0, mean = 0.0;
+    for (int i = 0; i < size; ++i) {
+        sum += data[i];
+    }
+
+    mean = sum / size;
+    return mean;
+}
+
+double calculateSD(vector<double> data, int size, double mean) {
+    double sum = 0.0, standardDeviation = 0.0;
+
+    for (int i = 0; i < size; ++i)
+        standardDeviation += pow(data[i] - mean, 2);
+
+    return sqrt(standardDeviation / size);
+}
+
+double calculateSampleCount(double mean, double sd) {
+    double sample_count = 100 * 1.96 * sd / (5 * mean);
+    return sample_count;
+}
+	
 	
 int main()
 {
 	srand(time(0));   //seed for random number generation
 	
-	const int matrixCount = 10;   //no of matrix sizes taken into account
 	const int sampleSize = 20;      // Number of sample size consider to evaluate average time taken
 	const int maxSize = 2000;       // maximum size of the 2d matrix
+	double dtime;
+	double seqMean;
+	double parMean;
+	double sd;
+	double sampleCount;
 	
-	//vectors storing execution time values
-	vector<double> seqTime(matrixCount);      
-	vector<double> parTime(matrixCount);
-	
-	int count = 0;
-	
-	cout << "Sequential multiplication"<< endl;
-	count = 0;
 	for (int n = 200; n <= maxSize; n+=200) {
-		double total_time = 0;
+
+		//vectors storing execution time values
+		vector<double> seqTime(sampleSize);      
+		vector<double> parTime(sampleSize);
+		
 		for (int k = 0; k < sampleSize; k++) {
 			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
 			
 			initMat(a,b,n);
 			
+			//sequential execution		
 			dtime = omp_get_wtime();
 			multiplyMatSeq(a,b,c,n);
 			dtime = omp_get_wtime() - dtime;
 			//cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
-			total_time+= dtime;
+			seqTime[k] = dtime;
+			
+			//parallel execution
+			dtime = 0;			
+			dtime = omp_get_wtime();
+			multiplyMatParallel(a,b,c,n);
+			dtime = omp_get_wtime() - dtime;
+			parTime[k] = dtime;
 		}
-		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/sampleSize << endl;
-		seqTime[count] = total_time/sampleSize;
-		count++;
+		cout << "Sequential multiplication"<< endl;
+		seqMean = calculateMean(seqTime, sampleSize);
+		sd = calculateSD(seqTime, sampleSize, seqMean);
+		sampleCount = calculateSampleCount(seqMean, sd);
+		
+		cout << "Average time taken to execute in n-" << n << " : " << seqMean << endl;
+		cout << "Standard deviation for execution in n-" << n << " : " << sd << endl;
+		cout << "Sample count for n-" << n << " : " << sampleCount << endl;
+		cout << endl;
+		
+		cout << "Parallel multiplication using openMP"<< endl;
+		parMean = calculateMean(parTime, sampleSize);
+		sd = calculateSD(parTime, sampleSize, parMean);
+		sampleCount = calculateSampleCount(parMean, sd);
+		
+		cout << "Average time taken to execute in n-" << n << " : " << parMean << endl;
+		cout << "Standard deviation for execution in n-" << n << " : " << sd << endl;
+		cout << "Sample count for n-" << n << " : " << sampleCount << endl;
+		cout << endl;
+		
+		cout << "Speed up after Parallelizing for n-" << n << " : " << seqMean/parMean << endl;
+		cout << endl;
 	}
 	
-	cout << "Parallel multiplication using openMP"<< endl;
-	count = 0;
+	
+	/* count = 0;
 	for (int n = 200; n <= maxSize; n+=200) {
 		double total_time = 0;
 		for (int k = 0; k < sampleSize; k++) {
@@ -118,7 +168,7 @@ int main()
 	for(int i=0; i<matrixCount; i++){
 		cout << "Speed up after Parallelizing for n-" << n << " : " << seqTime[i]/parTime[i] << endl;
 		n+=200;
-	}
+	} */
 	
     return 0;
 }

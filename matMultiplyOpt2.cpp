@@ -15,7 +15,6 @@
 
 using namespace std;
 
-double dtime;
 int thresholdSize = 128;  //size at which the sequential multiplication is used instead of recursive Strassen
 
 void initMat(vector< vector<double> > &a,vector< vector<double> > &b,int n){
@@ -106,7 +105,7 @@ void subtract(vector< vector<double> > &a, vector< vector<double> > &b, vector< 
 	}
 }
 	
-void multiplyStrassen(vector< vector<double> > &a,vector< vector<double> > &b, vector< vector<double> > &c, int n){
+void multiplyStrassen(vector< vector<double> > &a,vector< vector<double> > &b, vector< vector<double> > &c, int n){	
 	if(n<=thresholdSize){
 		multiplyMatSeq(a, b, c, n);
 	}
@@ -267,35 +266,35 @@ void multiplyStrassenParallel(vector< vector<double> > &a,vector< vector<double>
 				//m1 = (a11+a22)(b11+b22)
 				add(a11, a22, aBlock, blockSize);
 				add(b11, b22, bBlock, blockSize);
-				multiplyStrassen(aBlock, bBlock, m1, blockSize);
+				multiplyStrassenParallel(aBlock, bBlock, m1, blockSize);
 			}
 
 			#pragma omp section
 			{
 				//m2 = (a21+a22)b11
 				add(a21, a22, aBlock, blockSize);
-				multiplyStrassen(aBlock, b11, m2, blockSize);
+				multiplyStrassenParallel(aBlock, b11, m2, blockSize);
 			}
 		
 			#pragma omp section
 			{
 				//m3 = a11(b12-b22)
 				subtract(b12, b22, bBlock, blockSize);
-				multiplyStrassen(a11, bBlock, m3, blockSize);
+				multiplyStrassenParallel(a11, bBlock, m3, blockSize);
 			}
 			
 			#pragma omp section
 			{
 				//m4 = a22(b21-b11)
 				subtract(b21, b11, bBlock, blockSize);
-				multiplyStrassen(a22, bBlock, m4, blockSize);
+				multiplyStrassenParallel(a22, bBlock, m4, blockSize);
 			}
 			
 			#pragma omp section
 			{
 				//m5 = (a11+a12)b22
 				add(a11, a12, aBlock, blockSize);
-				multiplyStrassen(aBlock, b22, m5, blockSize);
+				multiplyStrassenParallel(aBlock, b22, m5, blockSize);
 			}
 			
 			#pragma omp section
@@ -303,7 +302,7 @@ void multiplyStrassenParallel(vector< vector<double> > &a,vector< vector<double>
 				//m6 = (a21-a11)(b11+b12)
 				subtract(a21, a11, aBlock, blockSize);
 				add(b11, b12, bBlock, blockSize);
-				multiplyStrassen(aBlock, bBlock, m6, blockSize);
+				multiplyStrassenParallel(aBlock, bBlock, m6, blockSize);
 			}
 			
 			#pragma omp section
@@ -311,7 +310,7 @@ void multiplyStrassenParallel(vector< vector<double> > &a,vector< vector<double>
 				//m7 = (a12-a22)(b12+b22)
 				subtract(a12, a22, aBlock, blockSize);
 				add(b12, b22, bBlock, blockSize);
-				multiplyStrassen(aBlock, bBlock, m7, blockSize);
+				multiplyStrassenParallel(aBlock, bBlock, m7, blockSize);
 			}
 		}
 		
@@ -373,65 +372,94 @@ void multiplyStrassenParallel(vector< vector<double> > &a,vector< vector<double>
 		}
 	}
 }
+
+double calculateMean(vector<double> data, int size) {
+    double sum = 0.0, mean = 0.0;
+    for (int i = 0; i < size; ++i) {
+        sum += data[i];
+    }
+
+    mean = sum / size;
+    return mean;
+}
+
+double calculateSD(vector<double> data, int size, double mean) {
+    double sum = 0.0, standardDeviation = 0.0;
+
+    for (int i = 0; i < size; ++i)
+        standardDeviation += pow(data[i] - mean, 2);
+
+    return sqrt(standardDeviation / size);
+}
+
+double calculateSampleCount(double mean, double sd) {
+    double sample_count = 100 * 1.96 * sd / (5 * mean);
+    return sample_count;
+}
 	
-int main()
+int main(int argc, char *argv[])
 {
 	srand(time(0));   //seed for random number generation
 	
-	const int matrixCount = 10;   //no of matrix sizes taken into account
-	const int sampleSize = 20;    //no of samples to evaluate average time taken
-	const int maxSize = 2000;     //maximum size of the matrix 
+	const int sampleSize = 20;      // Number of sample size consider to evaluate average time taken
+	const int maxSize = 600;       // maximum size of the 2d matrix
+	double dtime;
+	double seqMean;
+	double parMean;
+	double sd;
+	double sampleCount;
 	
-	//vectors storing execution time values
-	vector<double> strTime(matrixCount);      
-	vector<double> strParTime(matrixCount);
+	if(argc>1){
+		thresholdSize = atoi(argv[1]);  //set threshold value if given by user
+	}
 	
-	int count = 0;
-	
-	cout << "Sequential multiplication with Strassen - Optimization 2"<< endl;
-	count = 0;
 	for (int n = 200; n <= maxSize; n+=200) {
-		double total_time = 0;
+		cout << "threshold: "<< thresholdSize <<endl;
+		//vectors storing execution time values
+		vector<double> seqTime(sampleSize);      
+		vector<double> parTime(sampleSize);
+		
 		for (int k = 0; k < sampleSize; k++) {
 			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
 			
 			initMat(a,b,n);
-			dtime = omp_get_wtime();  //get current time
+			
+			//sequential execution		
+			dtime = omp_get_wtime();
 			multiplyStrassen(a,b,c,n);
-			dtime = omp_get_wtime() - dtime;  //get execution time
+			dtime = omp_get_wtime() - dtime;
 			//cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
-			total_time+= dtime;
-		}
-		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/sampleSize << endl;
-		strTime[count] = total_time/sampleSize;
-		count++;
-	}
-	
-	cout << "Parallel multiplication using openMP with Strassen - Optimization 2"<< endl;
-	count = 0;
-	for (int n = 200; n <= maxSize; n+=200) {
-		double total_time = 0;
-		for (int k = 0; n < sampleSize; n++) {
-			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
+			seqTime[k] = dtime;
 			
-			initMat(a,b,n);
-			
+			//parallel execution
+			dtime = 0;			
 			dtime = omp_get_wtime();
 			multiplyStrassenParallel(a,b,c,n);
 			dtime = omp_get_wtime() - dtime;
-			//cout << "Time taken to execute in n-"<< n << " : "<< dtime << endl;
-			total_time+= dtime;
+			parTime[k] = dtime;
 		}
-		cout << "Average time taken to execute in n-"<< n << " : "<< total_time/sampleSize << endl;
-		strParTime[count] = total_time/sampleSize;
-		count++;
-	}  
-	
-	cout << "Speed up calculations - Using Strassen" << endl;
-	int n = 200;
-	for(int i=0; i<matrixCount; i++){
-		cout << "Speed up using Strassen for n-" << n << " : " << strTime[i]/strParTime[i] << endl;
-		n+=200;
+		cout << "Sequential multiplication"<< endl;
+		seqMean = calculateMean(seqTime, sampleSize);
+		sd = calculateSD(seqTime, sampleSize, seqMean);
+		sampleCount = calculateSampleCount(seqMean, sd);
+		
+		cout << "Average time taken to execute in n-" << n << " : " << seqMean << endl;
+		cout << "Standard deviation for execution in n-" << n << " : " << sd << endl;
+		cout << "Sample count for n-" << n << " : " << sampleCount << endl;
+		cout << endl;
+		
+		cout << "Parallel multiplication using openMP"<< endl;
+		parMean = calculateMean(parTime, sampleSize);
+		sd = calculateSD(parTime, sampleSize, parMean);
+		sampleCount = calculateSampleCount(parMean, sd);
+		
+		cout << "Average time taken to execute in n-" << n << " : " << parMean << endl;
+		cout << "Standard deviation for execution in n-" << n << " : " << sd << endl;
+		cout << "Sample count for n-" << n << " : " << sampleCount << endl;
+		cout << endl;
+		
+		cout << "Speed up after Parallelizing for n-" << n << " : " << seqMean/parMean << endl;
+		cout << endl;
 	}
     
 	return 0;
