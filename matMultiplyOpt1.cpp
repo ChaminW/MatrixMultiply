@@ -13,7 +13,7 @@
 
 using namespace std;
 
-void initMat(vector< vector<double> > &a,vector< vector<double> > &b,int n){
+void initMat(double **a,double **b,int n){
 		// Initialize arrays.
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < n; ++j) {
@@ -23,7 +23,7 @@ void initMat(vector< vector<double> > &a,vector< vector<double> > &b,int n){
 			}
 		}
 	}
-void transpose(vector< vector<double> > &b, vector< vector<double> > &btrans, int n) {
+void transpose(double **b,double **btrans,int n) {
 		// Finding transpose of matrix b[][] and storing it in matrix btrans[][]
 		for(int i = 0; i < n; ++i)
 			for(int j = 0; j < n; ++j)
@@ -32,11 +32,15 @@ void transpose(vector< vector<double> > &b, vector< vector<double> > &btrans, in
 			}
 	}
 	
-void multiplyTMatSeq(vector< vector<double> > &a,vector< vector<double> > &b, vector< vector<double> > &c, int n){
+void multiplyTMatSeq(double **a,double **b,double **c,int n){
 		// Compute matrix multiplication.
 		// Transpose the B matrix
 		// C <- C + A x Btrans
-		vector< vector<double> > btrans(n,vector<double>(n));
+		double **btrans = (double **)malloc(n * sizeof(double *));
+    	for (int i=0; i<n; i++){
+         	btrans[i] = (double *)malloc(n * sizeof(double));
+    	}
+    	
 		transpose(b,btrans,n);
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < n; ++j) {
@@ -47,14 +51,22 @@ void multiplyTMatSeq(vector< vector<double> > &a,vector< vector<double> > &b, ve
 				c[i][j]=temp;
 			}
 		}
+		for(int i = 0; i< n; i++){   
+		    free(btrans[i]);
+		}
+		free(btrans);
 	}
 
-	void multiplyTMatParallel(vector< vector<double> > &a,vector< vector<double> > &b, vector< vector<double> > &c, int n){
+	void multiplyTMatParallel(double **a,double **b,double **c,int n){
 		// Compute matrix multiplication.
 		// Transpose the B matrix
 		// C <- C + A x Btrans
 		// Use omp parrelle for loop
-		vector< vector<double> > btrans(n,vector<double>(n));
+		double **btrans = (double **)malloc(n * sizeof(double *));
+    	for (int i=0; i<n; i++){
+         	btrans[i] = (double *)malloc(n * sizeof(double));
+    	}
+
 		transpose(b,btrans,n);
 		 int i,j,k;
 		#pragma omp parallel shared(a,b,c) private(i,j,k) 
@@ -70,6 +82,10 @@ void multiplyTMatSeq(vector< vector<double> > &a,vector< vector<double> > &b, ve
 				}
 			}
 		}
+		for(int i = 0; i< n; i++){   
+		    free(btrans[i]);
+		}
+		free(btrans);
 	}
 	
 double calculateMean(vector<double> data, int size) {
@@ -113,10 +129,21 @@ int main()
 		//vectors storing execution time values
 		vector<double> seqTime(sampleSize);      
 		vector<double> parTime(sampleSize);
+
+
 		
 		for (int k = 0; k < sampleSize; k++) {
-			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
-			
+			//vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
+			double **a = (double **)malloc(n * sizeof(double *));
+			double **b = (double **)malloc(n * sizeof(double *));
+			double **c = (double **)malloc(n * sizeof(double *));
+
+    		for (int i=0; i<n; i++){
+         		a[i] = (double *)malloc(n * sizeof(double));
+         		b[i] = (double *)malloc(n * sizeof(double));
+         		c[i] = (double *)malloc(n * sizeof(double));
+    		}
+
 			initMat(a,b,n);
 			
 			//sequential execution		
@@ -132,6 +159,17 @@ int main()
 			multiplyTMatParallel(a,b,c,n);
 			dtime = omp_get_wtime() - dtime;
 			parTime[k] = dtime;
+
+			//free memory
+		    for(int i = 0; i< n; i++){   
+		    	free(a[i]);
+		    	free(b[i]);
+		    	free(c[i]);
+		    }
+		    free(a);
+		    free(b);
+		    free(c);
+
 		}
 		cout << "Sequential multiplication"<< endl;
 		seqMean = calculateMean(seqTime, sampleSize);
