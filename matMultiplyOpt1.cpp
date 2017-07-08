@@ -13,6 +13,9 @@
 
 using namespace std;
 
+const int NUM_THREADS = 4;
+
+
 void initMat(double **a,double **b,int n){
 		// Initialize arrays.
 		for (int i = 0; i < n; ++i) {
@@ -25,8 +28,10 @@ void initMat(double **a,double **b,int n){
 	}
 void transpose(double **b,double **btrans,int n) {
 		// Finding transpose of matrix b[][] and storing it in matrix btrans[][]
-		for(int i = 0; i < n; ++i)
-			for(int j = 0; j < n; ++j)
+		int i,j;
+		#pragma omp parallel for num_threads(NUM_THREADS) shared(b,btrans) private(i,j)
+		for(i = 0; i < n; ++i)
+			for(j = 0; j < n; ++j)
 			{
 				btrans[j][i]=b[i][j];
 			}
@@ -68,20 +73,18 @@ void multiplyTMatSeq(double **a,double **b,double **c,int n){
     	}
 
 		transpose(b,btrans,n);
-		 int i,j,k;
-		#pragma omp parallel shared(a,b,c) private(i,j,k) 
-		{
-			#pragma omp for schedule(static)
-			for (i = 0; i < n; ++i) {
-				for (j = 0; j < n; ++j) {	
-					double temp  = 0;
-					for (k = 0; k < n; ++k) {
-						temp += a[i][k] * btrans[j][k];
-					}
-					c[i][j]=temp;
+		int i,j,k;
+		#pragma omp parallel for num_threads(NUM_THREADS) default(none) shared(a,btrans,c,n) private(i,j,k)
+		for (i = 0; i < n; ++i) {
+			for (j = 0; j < n; ++j) {	
+				double temp  = 0;
+				for (k = 0; k < n; ++k) {
+					temp += a[i][k] * btrans[j][k];
 				}
+				c[i][j]=temp;
 			}
 		}
+		
 		for(int i = 0; i< n; i++){   
 		    free(btrans[i]);
 		}
