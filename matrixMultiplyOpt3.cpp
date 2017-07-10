@@ -7,6 +7,7 @@
 #include <cmath>
 
 using namespace std;
+int threads = 2;
 
 void initMat(vector< vector<double> > &a,vector< vector<double> > &b, int n){
 	// Initialize arrays.
@@ -36,56 +37,52 @@ void multiplyMatSeq(vector< vector<double> > &a,vector< vector<double> > &b, vec
 void multiplyMatNaive2(vector< vector<double> > &a,vector< vector<double> > &b, vector< vector<double> > &c, int n){
 	// Compute matrix multiplication.
 	// C <- C + A x B
-		for (int j = 0; j < n; ++j) {
-			double temp  = 0;
-			for (int k = 0; k < n; ++k) {
-				for (int i = 0; i < n; ++i) {
-					temp += a[i][k] * b[k][j];
-				}
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j) {			
+			for (int k = 0; k < n; k+=8) {					
+				c[i][j] +=
+					 + a[i][k]*b[j][k]
+					 + a[i][k+1]*b[j][k+1]
+					 + a[i][k+2]*b[j][k+2]
+					 + a[i][k+3]*b[j][k+3]
+					 + a[i][k+4]*b[j][k+4]
+					 + a[i][k+5]*b[j][k+5]
+					 + a[i][k+6]*b[j][k+6]
+					 + a[i][k+7]*b[j][k+7];
 			}
-			c[i][j]=temp;
 		}
+	}
 }
 
 void multiplyMatTiled(vector< vector<double> > &a,vector< vector<double> > &b, vector< vector<double> > &c, int n){
-	int blockSize = 256;
+	int blockSize = 64;
 	int ii,jj,kk,j,k;
-	#pragma omp parallel shared(a,b,c,blockSize) private(ii,jj,kk,j,k)
+	#pragma omp parallel num_threads(threads) shared(a,b,c,blockSize) private(ii,jj,kk,j,k)
 	{
 		#pragma omp for schedule(static)
-		#pragma unroll
-		/* for(int ii=0; ii<n; ii += blockSize){
+		
+		 for(int ii=0; ii<n; ii += blockSize){
 			for(int jj=0; jj<n; jj += blockSize){
 				for(int kk=0; kk<n; kk += blockSize){
 					for (int i = ii; i < min(ii+blockSize, n); ++i) {
-						for (int j = jj; j < min(jj+blockSize, n); ++j) {			
-							double temp  = 0;
-							for (int k = kk; k < min(kk+blockSize, n); ++k) {
-								temp += a[i][k] * b[j][k];
-							}
-							c[i][j]=temp;
+						for (int j = jj; j < min(jj+blockSize, n); ++j) {										
+							for (int k = kk; k < min(kk+blockSize, n); k+=8) {
+								c[i][j] +=
+									 + a[i][k]*b[j][k]
+									 + a[i][k+1]*b[j][k+1]
+									 + a[i][k+2]*b[j][k+2]
+									 + a[i][k+3]*b[j][k+3]
+									 + a[i][k+4]*b[j][k+4]
+									 + a[i][k+5]*b[j][k+5]
+									 + a[i][k+6]*b[j][k+6]
+									 + a[i][k+7]*b[j][k+7];
+							}							
 						}
 					}
 				}
 			}
 		}
-		 */
-		for(kk=0; kk<n; kk+=blockSize){
-			for(jj=0; jj<n; jj+=blockSize){
-				for(ii=0; ii<n; ii++){
-					for(j=jj; j<min(jj+blockSize, n); j++){
-						double temp = 0;
-						for(k=kk; k<min(kk+blockSize, n); k++){
-							temp += a[ii][k]*b[j][k];
-						}
-						c[ii][j] = temp;
-					}
-				}
-			}
-		}
-		
 	}
-	
 }
 
 vector< vector<double> > transpose(vector< vector<double> > &b,vector< vector<double> > &btrans, int n) {

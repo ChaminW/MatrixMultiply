@@ -1,0 +1,12 @@
+Block size used for cache blocking: 256
+--- n : 200 ---
+Sequential multiplication
+Average time taken to execute in n-200 : 0.16 seconds
+Sample count for n-200 : 89.8185
+
+Optimized parallel multiplication
+Average time taken to execute in n-200 : 0.14 seconds
+Sample count for n-200 : 97.1564
+
+Speed up after Parallelizing for n-200 : 1.14286
+

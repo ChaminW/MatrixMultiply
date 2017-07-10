@@ -5,6 +5,7 @@
  
 #include <stddef.h>
 #include <iostream>
+#include <fstream>
 #include <ctime>
 #include <cstdlib>
 #include <vector>
@@ -14,8 +15,9 @@
  
 using namespace std;
 
-const int NUM_THREADS = 2;		// number of threads for omp to run parallel for 
-const int sampleSize = 20;      // Number of sample size considered to evaluate average time taken
+const char *filename = "results/parallel.txt";    //file to store results of execution 
+//const int NUM_THREADS = 2;		// number of threads for omp to run parallel for 
+const int sampleSize = 50;      // Number of sample size considered to evaluate average time taken
 const int maxSize = 2000;       // maximum size of the 2d matrix
 double startTime;
 double elapsedTime;
@@ -23,6 +25,7 @@ double seqMean;
 double parMean;
 double sd;
 double sampleCount;
+ofstream f;
 
 //initialize matrices
 void initMat(vector< vector<double> > &a,vector< vector<double> > &b,int n);
@@ -34,6 +37,13 @@ void multiplyMatParallel(vector< vector<double> > &a,vector< vector<double> > &b
 int main()
 {
 	srand(time(0));   //seed for random number generation
+	
+	//open file to append
+	f.open(filename, ios::trunc);
+    if (!f.is_open()) {
+        cout << "Unable to open the file" << endl;
+        exit(1);
+    }
 	
 	//executing for each matrix size
 	for (int n = 200; n <= maxSize; n+=200) {
@@ -72,6 +82,11 @@ int main()
 		cout << "Sample count for n-" << n << " : " << sampleCount << endl;
 		cout << endl;
 		
+		f << "\n--- n : " << n << " ---\n";
+		f << "Sequential multiplication\n";
+		f << "Average time taken to execute in n-" << n << " : " << seqMean << " seconds\n";		
+		f << "Sample count for n-" << n << " : " << sampleCount << "\n\n";
+		
 		cout << "Parallel multiplication using openMP"<< endl;
 		parMean = calculateMean(parTime, sampleSize);
 		sd = calculateSD(parTime, sampleSize, parMean);
@@ -81,9 +96,16 @@ int main()
 		cout << "Sample count for n-" << n << " : " << sampleCount << endl;
 		cout << endl;
 		
+		f << "Parallel multiplication using openMP\n";
+		f << "Average time taken to execute in n-" << n << " : " << parMean << " seconds\n";		
+		f << "Sample count for n-" << n << " : " << sampleCount << "\n\n";
+		
 		cout << "Speed up after Parallelizing for n-" << n << " : " << seqMean/parMean << endl;
 		cout << endl;
+		
+		f << "Speed up after Parallelizing for n-" << n << " : " << seqMean/parMean << "\n\n";		
 	}
+	f.close();
 	
     return 0;
 }
@@ -115,7 +137,7 @@ void multiplyMatSeq(vector< vector<double> > &a,vector< vector<double> > &b, vec
 //compute parallel matrix multiplication using openMP parallel for
 void multiplyMatParallel(vector< vector<double> > &a,vector< vector<double> > &b, vector< vector<double> > &c, int n){
 	 int i,j,k;
-	#pragma omp parallel num_threads(NUM_THREADS) shared(a,b,c) private(i,j,k) 
+	#pragma omp parallel shared(a,b,c) private(i,j,k) 
 	{
 		#pragma omp for schedule(static)
 		for (i = 0; i < n; ++i) {

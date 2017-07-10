@@ -6,6 +6,7 @@
  */
  
 #include <iostream>
+#include <fstream>
 #include <ctime>
 #include <cstdlib>
 #include <vector>
@@ -15,9 +16,10 @@
  
 using namespace std;
 
-const int NUM_THREADS = 2;		// number of threads for omp to run parallel for 
-int thresholdSize = 128;  		// size at which the sequential multiplication is used instead of recursive Strassen
-const int sampleSize = 20;      // Number of sample size considered to evaluate average time taken
+const char *filename = "results/optimized1-threshold-256.txt";    //file to store results of execution 
+//const int NUM_THREADS = 2;		// number of threads for omp to run parallel for 
+int thresholdSize = 256;  		// size at which the sequential multiplication is used instead of recursive Strassen
+const int sampleSize = 50;      // Number of sample size considered to evaluate average time taken
 const int maxSize = 2000;       // maximum size of the 2d matrix
 double startTime;
 double elapsedTime;
@@ -25,6 +27,7 @@ double seqMean;
 double optMean;
 double sd;
 double sampleCount;
+ofstream f;
 
 // initialize matrices
 void initMat(vector< vector<double> > &a,vector< vector<double> > &b,int n);
@@ -52,11 +55,20 @@ int main(int argc, char *argv[])
 {
 	srand(time(0));   //seed for random number generation
 	
+	//open file to append
+	f.open(filename, ios::trunc);
+    if (!f.is_open()) {
+        cout << "Unable to open the file" << endl;
+        exit(1);
+    }
+	
 	if(argc>1){
 		thresholdSize = atoi(argv[1]);  //set threshold value if given by user
 	}
 	cout << "Threshold used for Strassen's: "<< thresholdSize <<endl;
 	cout << endl;
+	
+	f << "Threshold used for Strassen's: "<< thresholdSize << "\n";
 	
 	//executing for each matrix size
 	for (int n = 200; n <= maxSize; n+=200) {
@@ -98,6 +110,11 @@ int main(int argc, char *argv[])
 		cout << "Sample count for n-" << n << " : " << sampleCount << endl;
 		cout << endl;
 		
+		f << "--- n : " << n << " ---\n";
+		f << "Sequential multiplication\n";
+		f << "Average time taken to execute in n-" << n << " : " << seqMean << " seconds\n";		
+		f << "Sample count for n-" << n << " : " << sampleCount << "\n\n";
+		
 		cout << "Optimized parallel multiplication"<< endl;		
 		optMean = calculateMean(optTime, sampleSize);
 		sd = calculateSD(optTime, sampleSize, optMean);
@@ -107,10 +124,17 @@ int main(int argc, char *argv[])
 		cout << "Sample count for n-" << n << " : " << sampleCount << endl;
 		cout << endl;
 		
+		f << "Optimized parallel multiplication\n";
+		f << "Average time taken to execute in n-" << n << " : " << optMean << " seconds\n";		
+		f << "Sample count for n-" << n << " : " << sampleCount << "\n\n";
+		
 		cout << "Speed up after parallelized optimization for n-" << n << " : " << seqMean/optMean << endl;
 		cout << endl;
 		
+		f << "Speed up after Parallelizing for n-" << n << " : " << seqMean/optMean << "\n\n";	
+		
 	}
+	f.close();
     
 	return 0;
 }
@@ -142,7 +166,7 @@ void multiplyMatSeq(vector< vector<double> > &a,vector< vector<double> > &b, vec
 //compute parallel matrix multiplication using openMP parallel for
 void multiplyMatParallel(vector< vector<double> > &a,vector< vector<double> > &b, vector< vector<double> > &c, int n){
 	 int i,j,k;
-	#pragma omp parallel num_threads(NUM_THREADS) shared(a,b,c) private(i,j,k) 
+	#pragma omp parallel shared(a,b,c) private(i,j,k) 
 	{
 		#pragma omp for schedule(static)
 		for (i = 0; i < n; ++i) {
@@ -160,7 +184,7 @@ void multiplyMatParallel(vector< vector<double> > &a,vector< vector<double> > &b
 // finding transpose of matrix b[][] and storing it in matrix btrans[][]
 vector< vector<double> > transpose(vector< vector<double> > &b,vector< vector<double> > &btrans, int n) {	
 	int i,j;
-	#pragma omp parallel num_threads(NUM_THREADS) shared(b,btrans) private(i,j)
+	#pragma omp parallel shared(b,btrans) private(i,j)
 	{
 		#pragma omp for schedule(static)
 		for(i = 0; i < n; ++i){	
