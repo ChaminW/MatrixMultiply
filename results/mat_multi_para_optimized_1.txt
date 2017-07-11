@@ -1,0 +1,41 @@
+Parallel multiplication using openMP - Optimized - v1
+
+--- n : 200 ---
+Average time taken to execute in n-200 : 0.0360879 seconds
+
+
+--- n : 400 ---
+Average time taken to execute in n-400 : 0.192728 seconds
+
+
+--- n : 600 ---
+Average time taken to execute in n-600 : 0.45473 seconds
+
+
+--- n : 800 ---
+Average time taken to execute in n-800 : 1.03427 seconds
+
+
+--- n : 1000 ---
+Average time taken to execute in n-1000 : 1.87691 seconds
+
+
+--- n : 1200 ---
+Average time taken to execute in n-1200 : 3.15157 seconds
+
+
+--- n : 1400 ---
+Average time taken to execute in n-1400 : 4.91319 seconds
+
+
+--- n : 1600 ---
+Average time taken to execute in n-1600 : 7.57101 seconds
+
+
+--- n : 1800 ---
+Average time taken to execute in n-1800 : 10.9785 seconds
+
+
+--- n : 2000 ---
+Average time taken to execute in n-2000 : 14.2572 seconds
+
