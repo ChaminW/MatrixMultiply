@@ -69,7 +69,7 @@ int main()
 	ofstream f;
 
 	srand(time(0));   //seed for random number generation
-	const int sampleSize = 1;      // Number of sample size consider to evaluate average time taken
+	const int sampleSize = 20;      // Number of sample size consider to evaluate average time taken
 	const int maxSize = 2000;       // maximum size of the 2d matrix
 	double dtime;
 	struct timeval startingTime, endingTime;
