@@ -1,5 +1,5 @@
 /*
- * Parallel Matrix Multiplication using openMP
+ * Parallel Matrix Multiplication using openMP with transpose - Optimization 1 - with pointer arrays
  * Compile with -fopenmp flag
  * Author: Chamin Wickramarathna
  */
@@ -14,7 +14,9 @@
 
 using namespace std;
 
-void initMat(vector< vector<double> > &a,vector< vector<double> > &b,int n){
+const int NUM_THREADS = 4;
+
+void initMat(double **a,double **b,int n){
 		// Initialize arrays.
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < n; ++j) {
@@ -25,22 +27,34 @@ void initMat(vector< vector<double> > &a,vector< vector<double> > &b,int n){
 		}
 	}
 
-void multiplyMatParallel(vector< vector<double> > &a,vector< vector<double> > &b, vector< vector<double> > &c, int n){
+void multiplyMatParallel(double **a,double **b,double **c,int n){
 		// Compute matrix multiplication.
 		// C <- C + A x B
 		// Use omp parrelle for loop
-		 int i,j,k;
-		#pragma omp parallel shared(a,b,c) private(i,j,k) 
-		{
-			#pragma omp for
-			for (i = 0; i < n; ++i) {
-				for (j = 0; j < n; ++j) {	
-					for (k = 0; k < n; ++k) {
-						c[i][j] += a[i][k] * b[k][j];
-					}
-				}
+
+		double **btrans = (double **)malloc(n * sizeof(double *));
+    	for (int i=0; i<n; i++){
+         	btrans[i] = (double *)malloc(n * sizeof(double));
+    	}
+
+		for(int i = 0; i < n; ++i){
+			for(int j = 0; j < n; ++j){
+				btrans[j][i]=b[i][j];
 			}
 		}
+
+		#pragma omp parallel for
+		for (int i = 0; i < n; ++i) {
+			#pragma omp parallel for
+			for (int j = 0; j < n; ++j) {	
+				double temp  = 0;
+				for (int k = 0; k < n; ++k) {
+					temp += a[i][k] * btrans[j][k];
+				}
+				c[i][j]=temp;
+			}
+		}
+		
 	}
 	
 double calculateMean(vector<double> data, int size) {
@@ -70,17 +84,17 @@ double calculateSampleCount(double mean, double sd) {
 	
 int main()
 {
-	const char *filename = "results/mat_multi_para.txt";    //file to store results of execution 
+	const char *filename = "results/mat_multi_para_optimized_1.txt";    //file to store results of execution 
 	ofstream f;
 
 	srand(time(0));   //seed for random number generation
-	const int sampleSize = 20;      // Number of sample size consider to evaluate average time taken
+	const int sampleSize = 10;      // Number of sample size consider to evaluate average time taken
 	const int maxSize = 2000;       // maximum size of the 2d matrix
 	double dtime;
 	double parMean;
 	double sd;
 	double sampleCount;
-
+	
 	//open file to append
 	f.open(filename, ios::trunc);
     if (!f.is_open()) {
@@ -88,8 +102,8 @@ int main()
         exit(1);
     }
 
-	cout << "Parallel multiplication using openMP"<< endl;
-	f << "Parallel multiplication using openMP\n";
+	cout << "Parallel multiplication using openMP - Optimized - v1"<< endl;
+	f << "Parallel multiplication using openMP - Optimized - v1\n";
 
 	for (int n = 200; n <= maxSize; n+=200) {
 
@@ -98,19 +112,36 @@ int main()
 		vector<double> parTime(sampleSize);
 		
 		for (int k = 0; k < sampleSize; k++) {
-			vector< vector<double> > a(n,vector<double>(n)),b(n,vector<double>(n)),c(n,vector<double>(n));	//c = a * b, c is the result matrix
-			
+			double **a = (double **)malloc(n * sizeof(double *));
+			double **b = (double **)malloc(n * sizeof(double *));
+			double **c = (double **)malloc(n * sizeof(double *));
+
+    		for (int i=0; i<n; i++){
+         		a[i] = (double *)malloc(n * sizeof(double));
+         		b[i] = (double *)malloc(n * sizeof(double));
+         		c[i] = (double *)malloc(n * sizeof(double));
+    		}
+
 			initMat(a,b,n);
-			
-			
+		
 			//parallel execution
 			dtime = 0;			
 			dtime = omp_get_wtime();
 			multiplyMatParallel(a,b,c,n);
 			dtime = omp_get_wtime() - dtime;
 			parTime[k] = dtime;
+
+			//free memory
+		    for(int i = 0; i< n; i++){   
+		    	free(a[i]);
+		    	free(b[i]);
+		    	free(c[i]);
+		    }
+		    free(a);
+		    free(b);
+		    free(c);
 		}
-	
+		
 		parMean = calculateMean(parTime, sampleSize);
 		sd = calculateSD(parTime, sampleSize, parMean);
 		sampleCount = calculateSampleCount(parMean, sd);
@@ -122,11 +153,9 @@ int main()
 
 		f << "\n--- n : " << n << " ---\n";
 		f << "Average time taken to execute in n-" << n << " : " << parMean << " seconds\n\n";		
-
+		
 	}
-	f.close();
+	
     return 0;
 }
 
-
-	
