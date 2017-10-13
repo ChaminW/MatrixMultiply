@@ -66,7 +66,7 @@ mat_multi_seq
 Both parallelized and optimized versions can be executed as above.
 Upon execution, the execution times and the calculated speed up values will be displayed.
 
-###Note
+##Note
 The ```mat_multi_seq_para_optimized_2.cpp``` file containing optimizing using Strassen algorithm can be supplied with a suitable integer threshold value at runtime as follows
 ```shell
 mat_multi_seq_para_optimized_2 threshold-value
