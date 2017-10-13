@@ -52,9 +52,15 @@ $ ./mat_multi_seq
 ```
 
 ## Windows
+Sequential versions :
 ```shell
-g++ -fopenmp matMultiply.cpp -o matMultiply
-matMultiply
+g++ mat_multi_seq.cpp -o mat_multi_seq
+mat_multi_seq
+```
+Parallel versions:
+```shell
+g++ -fopenmp mat_multi_seq.cpp -o mat_multi_seq
+mat_multi_seq
 ```
 
 Both parallelized and optimized versions can be executed as above.
