@@ -2,9 +2,13 @@
 
 This c++ package demonstrate the multiplication of two random matrices(n x n) using sequential method and parallel method. It measure the average time taken to complete the process for each n value(200 - 2000).
 
-```matMultiply.cpp``` - Sequential matrix multiplication and its parallelization using OpenMP<br>
-```matMultiplyOpt1.cpp``` - Optimized program using transpose<br>
-```matMultiplyOpt2.cpp``` - Optimized program using Strassen
+```mat_multi_seq.cpp``` - Sequential matrix multiplication<br>
+```mat_multi_para.cpp``` - Parallel matrix multiplication using OpenMP<br>
+```mat_multi_seq_optimized_1``` - Optimized sequential program using transpose<br>
+```mat_multi_para_optimized_1``` - Optimized parallel program using transpose<br>
+```mat_multi_para_optimized_1.1``` - Optimized parallel program using transpose and pointer arrays<br>
+```mat_multi_seq_para_optimized_2``` - Optimized program using Strassen algorithm and Transpose<br>
+```mat_multi_seq_para_optimized_3``` - Optimized program using tiled algorithm and Transpose<br>
 
 # Dependencies
 
@@ -36,9 +40,15 @@ You will require to install [XCode](https://developer.apple.com/xcode/).
 # How to execute?
 
 ## Linux
+Sequential versions :
 ```shell
-$ g++ -fopenmp matMultiply.cpp -o matMultiply
-$ ./matMultiply
+$ g++ mat_multi_seq.cpp -o mat_multi_seq
+$ ./mat_multi_seq
+```
+Parallel versions:
+```shell
+$ g++ -fopenmp mat_multi_seq.cpp -o mat_multi_seq
+$ ./mat_multi_seq
 ```
 
 ## Windows
@@ -50,10 +60,9 @@ matMultiply
 Both parallelized and optimized versions can be executed as above.
 Upon execution, the execution times and the calculated speed up values will be displayed.
 
-The ```matMultiplyOpt2.cpp``` file containing optimizing using Strassen algorithm can be supplied with a suitable integer threshold value as follows:
+The ```mat_multi_seq_para_optimized_2.cpp``` file containing optimizing using Strassen algorithm can be supplied with a suitable integer threshold value at runtime as follows
 ```shell
-g++ -fopenmp matMultiplyOpt2.cpp -o matMultiply
-matMultiply threshold-value
+mat_multi_seq_para_optimized_2 threshold-value
 ```
 
 The default threshold value is 128.

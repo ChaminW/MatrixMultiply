@@ -155,7 +155,7 @@ int main()
 		f << "Average time taken to execute in n-" << n << " : " << parMean << " seconds\n\n";		
 		
 	}
-	
+	f.close();
     return 0;
 }
 
